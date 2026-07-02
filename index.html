@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quét Hàng - Ông Bà</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Roboto', system-ui, sans-serif;
+        }
+        
+        .big-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .big-btn:active {
+            transform: scale(0.96);
+        }
+        
+        .scan-frame {
+            border: 4px solid #3b82f6;
+            animation: scanPulse 2s infinite;
+        }
+        
+        @keyframes scanPulse {
+            0%, 100% { border-color: #3b82f6; }
+            50% { border-color: #60a5fa; }
+        }
+        
+        .nav-active {
+            color: #1e40af;
+            border-bottom: 3px solid #1e40af;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 min-h-screen pb-20">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div class="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-3xl">📦</div>
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">Quét Hàng</h1>
+                    <p class="text-sm text-slate-500 -mt-1">Dành cho người cao tuổi</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="toggleVoice()" 
+                        class="px-5 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-3xl flex items-center gap-2 text-lg font-medium">
+                    <i class="fa-solid fa-microphone"></i>
+                    <span class="hidden sm:inline">Nói</span>
+                </button>
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold cursor-pointer" onclick="showProfile()">
+                    A
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-2xl mx-auto px-6 pt-6">
+        <!-- TAB 1: HOME -->
+        <div id="screen-home" class="tab-screen">
+            <div class="bg-white rounded-3xl p-6 shadow-sm mb-8">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="text-slate-500 text-sm">Hôm nay</div>
+                        <div class="text-5xl font-bold text-blue-600 mt-1" id="scan-count">15 <span class="text-3xl text-slate-400">/ 20</span></div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-emerald-600 text-sm font-medium">Hoàn thành tốt</div>
+                        <div class="text-2xl mt-1">👍</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="switchScreen(2)" 
+                        class="big-btn h-52 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-3xl p-8 flex flex-col items-center justify-center gap-4 shadow-xl">
+                    <div class="text-6xl">📷</div>
+                    <div class="text-2xl font-semibold">Quét Mã Hàng</div>
+                    <div class="text-blue-200 text-sm">Bắt đầu quét ngay</div>
+                </button>
+                
+                <button onclick="switchScreen(6)" 
+                        class="big-btn h-52 bg-white border-2 border-slate-200 hover:border-blue-300 rounded-3xl p-8 flex flex-col items-center justify-center gap-4">
+                    <div class="text-6xl">📋</div>
+                    <div class="text-2xl font-semibold text-slate-700">Danh sách đơn</div>
+                    <div class="text-slate-500 text-sm">Xem 20 đơn hàng</div>
+                </button>
+            </div>
+
+            <button onclick="switchScreen(7)" 
+                    class="w-full mt-6 big-btn bg-white border border-slate-300 hover:border-slate-400 h-20 rounded-3xl flex items-center justify-center gap-4 text-xl font-medium">
+                <i class="fa-solid fa-headset text-3xl text-blue-500"></i>
+                <span>Hỗ trợ - Hotline</span>
+            </button>
+        </div>
+
+        <!-- TAB 2: SCAN -->
+        <div id="screen-scan" class="tab-screen hidden">
+            <div class="bg-white rounded-3xl p-8 text-center">
+                <div class="mx-auto w-80 h-80 border-4 border-dashed scan-frame rounded-3xl flex items-center justify-center relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-white/30 to-transparent animate-[scanline_3s_linear_infinite]"></div>
+                    <div class="text-center">
+                        <div class="text-7xl mb-6">📦</div>
+                        <div class="font-medium text-xl">Đưa mã vạch vào khung</div>
+                        <div class="text-slate-500 text-sm mt-2">Camera sẽ tự động nhận diện</div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-4 mt-10">
+                    <button onclick="simulateScan(true)" 
+                            class="flex-1 py-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-3xl text-xl font-medium">Quét Thành Công</button>
+                    <button onclick="simulateScan(false)" 
+                            class="flex-1 py-6 bg-slate-200 hover:bg-slate-300 rounded-3xl text-xl font-medium">Thử quét lỗi</button>
+                </div>
+                
+                <button onclick="switchScreen(1)" 
+                        class="mt-6 w-full py-4 text-slate-500 hover:text-slate-700">← Quay lại</button>
+            </div>
+        </div>
+
+        <!-- SUCCESS -->
+        <div id="screen-success" class="tab-screen hidden bg-white rounded-3xl p-8">
+            <div class="text-center py-8">
+                <div class="mx-auto w-28 h-28 bg-emerald-100 rounded-full flex items-center justify-center text-7xl mb-6">✅</div>
+                <h2 class="text-3xl font-bold text-emerald-600">THÀNH CÔNG</h2>
+                <p class="text-slate-500 mt-2">Đã quét mã hàng</p>
+                
+                <div class="mt-10 text-left space-y-4 bg-slate-50 rounded-2xl p-6">
+                    <div><span class="text-slate-500">Mã hàng:</span> <span class="font-mono font-bold">SPX123456789</span></div>
+                    <div><span class="text-slate-500">Tên hàng:</span> Máy lọc không khí Xiaomi 4 Lite</div>
+                    <div><span class="text-slate-500">Khách hàng:</span> Nguyễn Văn An</div>
+                    <div><span class="text-slate-500">Địa chỉ:</span> 123 Đường Nguyễn Trãi, P. Bến Thành, Quận 1, TP.HCM</div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mt-10">
+                    <button onclick="switchScreen(5)" class="py-6 bg-blue-600 text-white rounded-3xl text-xl">Chi tiết đơn</button>
+                    <button onclick="switchScreen(1)" class="py-6 bg-slate-100 hover:bg-slate-200 rounded-3xl text-xl">Quét tiếp</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAIL -->
+        <div id="screen-fail" class="tab-screen hidden bg-white rounded-3xl p-8">
+            <div class="text-center py-8">
+                <div class="mx-auto w-28 h-28 bg-red-100 rounded-full flex items-center justify-center text-7xl mb-6">❌</div>
+                <h2 class="text-3xl font-bold text-red-500">KHÔNG HỢP LỆ</h2>
+                <p class="mt-2 text-slate-500">Vui lòng quét lại</p>
+                
+                <div class="my-10 bg-slate-50 rounded-2xl p-6 text-left">
+                    <div class="flex justify-center mb-6">
+                        <div class="bg-white p-4 rounded-xl shadow-inner">█ █ █ █ █ █ █</div>
+                    </div>
+                    <p class="text-center text-slate-500">Không tìm thấy mã hàng hoặc mã bị mờ</p>
+                </div>
+                
+                <button onclick="switchScreen(2)" 
+                        class="w-full py-6 bg-blue-600 text-white rounded-3xl text-xl font-medium">Quét lại</button>
+            </div>
+        </div>
+
+        <!-- ORDER DETAIL -->
+        <div id="screen-detail" class="tab-screen hidden">
+            <div class="bg-white rounded-3xl p-6">
+                <div class="flex justify-between">
+                    <button onclick="switchScreen(6)" class="text-blue-600">← Danh sách</button>
+                    <div class="font-mono text-sm bg-slate-100 px-3 py-1 rounded-lg">DH250603001</div>
+                </div>
+                
+                <div class="mt-8 space-y-6">
+                    <div>
+                        <div class="text-slate-500 text-sm">Mã hàng</div>
+                        <div class="font-bold text-xl">SPX123456789</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 text-sm">Sản phẩm</div>
+                        <div class="font-medium">Máy lọc không khí Xiaomi 4 Lite</div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 text-sm">Khách hàng</div>
+                        <div class="font-medium flex items-center gap-2">
+                            Nguyễn Văn An 
+                            <span onclick="callCustomer()" class="text-blue-600 text-sm cursor-pointer">📞 Gọi</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-slate-500 text-sm">Địa chỉ giao</div>
+                        <div class="text-sm leading-snug">123 Đường Nguyễn Trãi,<br>P. Bến Thành, Quận 1, TP.HCM</div>
+                    </div>
+                </div>
+                
+                <button onclick="markDelivered()" 
+                        class="mt-12 w-full py-7 bg-emerald-600 text-white rounded-3xl text-2xl font-semibold big-btn">
+                    ✅ ĐÁNH DẤU ĐÃ GIAO
+                </button>
+            </div>
+        </div>
+
+        <!-- ORDER LIST -->
+        <div id="screen-list" class="tab-screen hidden">
+            <input type="text" id="search-input" 
+                   placeholder="🔍 Tìm mã đơn hoặc tên khách..." 
+                   onkeyup="filterOrders()"
+                   class="w-full bg-white border border-slate-300 rounded-3xl px-6 py-5 text-lg focus:outline-none focus:border-blue-400">
+            
+            <div id="orders-list" class="mt-6 space-y-3">
+                <!-- JS populated -->
+            </div>
+        </div>
+
+        <!-- SUPPORT -->
+        <div id="screen-support" class="tab-screen hidden bg-white rounded-3xl p-8 text-center">
+            <div class="text-6xl mb-6">🛟</div>
+            <h2 class="text-3xl font-bold">Hỗ trợ</h2>
+            <p class="text-slate-500 mt-3">Chúng tôi luôn sẵn sàng hỗ trợ bạn</p>
+            
+            <div class="my-12 space-y-6">
+                <a href="tel:19001234" class="block bg-blue-50 hover:bg-blue-100 p-6 rounded-3xl text-left flex items-center gap-6">
+                    <div class="text-4xl">📞</div>
+                    <div>
+                        <div class="font-semibold text-xl">Gọi Hotline</div>
+                        <div class="text-blue-600 text-2xl font-medium">1900 1234</div>
+                    </div>
+                </a>
+                
+                <div onclick="fakeChat()" class="block bg-blue-50 hover:bg-blue-100 p-6 rounded-3xl text-left flex items-center gap-6">
+                    <div class="text-4xl">💬</div>
+                    <div>
+                        <div class="font-semibold text-xl">Trò chuyện</div>
+                        <div class="text-slate-500">Chat với nhân viên hỗ trợ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MENU -->
+        <div id="screen-menu" class="tab-screen hidden">
+            <div class="bg-white rounded-3xl divide-y">
+                <button onclick="switchScreen(1)" class="w-full text-left px-7 py-7 flex items-center gap-5 hover:bg-slate-50 rounded-t-3xl">
+                    <span class="text-3xl">🏠</span>
+                    <span class="text-2xl font-medium">Trang chủ</span>
+                </button>
+                <button onclick="switchScreen(6)" class="w-full text-left px-7 py-7 flex items-center gap-5 hover:bg-slate-50">
+                    <span class="text-3xl">📋</span>
+                    <span class="text-2xl font-medium">Lịch sử quét</span>
+                </button>
+                <button onclick="switchScreen(7)" class="w-full text-left px-7 py-7 flex items-center gap-5 hover:bg-slate-50">
+                    <span class="text-3xl">🛟</span>
+                    <span class="text-2xl font-medium">Hỗ trợ</span>
+                </button>
+                <button onclick="logout()" class="w-full text-left px-7 py-7 flex items-center gap-5 hover:bg-slate-50 text-red-500 rounded-b-3xl">
+                    <span class="text-3xl">🚪</span>
+                    <span class="text-2xl font-medium">Đăng xuất</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t max-w-2xl mx-auto">
+        <div class="grid grid-cols-4 text-xs py-3">
+            <button onclick="switchScreen(1)" class="flex flex-col items-center text-blue-600">
+                <i class="fa-solid fa-house text-2xl"></i>
+                <span class="mt-1">Trang chủ</span>
+            </button>
+            <button onclick="switchScreen(6)" class="flex flex-col items-center text-slate-400">
+                <i class="fa-solid fa-list text-2xl"></i>
+                <span class="mt-1">Đơn hàng</span>
+            </button>
+            <button onclick="switchScreen(7)" class="flex flex-col items-center text-slate-400">
+                <i class="fa-solid fa-headset text-2xl"></i>
+                <span class="mt-1">Hỗ trợ</span>
+            </button>
+            <button onclick="switchScreen(8)" class="flex flex-col items-center text-slate-400">
+                <i class="fa-solid fa-bars text-2xl"></i>
+                <span class="mt-1">Menu</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Toast -->
+    <div id="toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-8 py-4 rounded-3xl shadow-2xl flex items-center gap-3 z-50">
+        <span id="toast-text" class="font-medium"></span>
+    </div>
+
+    <script>
+        let currentScreen = 1
+        const orders = [
+            { id: "DH250603001", code: "SPX123456789", name: "Nguyễn Văn An", status: "done" },
+            { id: "DH250603002", code: "SPX987654321", name: "Trần Thị Bình", status: "pending" },
+            { id: "DH250603003", code: "SPX112233445", name: "Lê Minh Cường", status: "pending" }
+        ]
+        
+        function renderOrders(filtered = orders) {
+            const container = document.getElementById('orders-list')
+            container.innerHTML = ''
+            
+            filtered.forEach(order => {
+                const div = document.createElement('div')
+                div.className = `bg-white rounded-3xl p-5 flex justify-between items-center cursor-pointer border ${order.status === 'done' ? 'border-emerald-200' : 'border-slate-100'}`
+                div.innerHTML = `
+                    <div>
+                        <div class="font-mono font-bold">${order.id}</div>
+                        <div class="text-sm text-slate-600">${order.name}</div>
+                    </div>
+                    <div onclick="event.stopImmediatePropagation(); viewDetail('${order.id}')" 
+                         class="px-6 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-2xl text-sm font-medium">Chi tiết</div>
+                `
+                div.onclick = () => viewDetail(order.id)
+                container.appendChild(div)
+            })
+        }
+        
+        function filterOrders() {
+            const term = document.getElementById('search-input').value.toLowerCase()
+            const filtered = orders.filter(o => 
+                o.id.toLowerCase().includes(term) || 
+                o.name.toLowerCase().includes(term)
+            )
+            renderOrders(filtered)
+        }
+        
+        function simulateScan(success) {
+            if (success) {
+                document.getElementById('screen-scan').classList.add('hidden')
+                document.getElementById('screen-success').classList.remove('hidden')
+                showToast("✅ Quét mã thành công!")
+            } else {
+                document.getElementById('screen-scan').classList.add('hidden')
+                document.getElementById('screen-fail').classList.remove('hidden')
+            }
+        }
+        
+        function switchScreen(screen) {
+            document.querySelectorAll('.tab-screen').forEach(el => el.classList.add('hidden'))
+            const target = document.getElementById(`screen-${screen === 1 ? 'home' : screen === 2 ? 'scan' : screen === 5 ? 'detail' : screen === 6 ? 'list' : screen === 7 ? 'support' : screen === 8 ? 'menu' : 'home'}`)
+            if (target) target.classList.remove('hidden')
+            
+            currentScreen = screen
+        }
+        
+        function viewDetail(id) {
+            switchScreen(5)
+        }
+        
+        function markDelivered() {
+            showToast("✅ Đơn hàng đã được đánh dấu giao thành công!")
+            setTimeout(() => switchScreen(6), 1500)
+        }
+        
+        function callCustomer() {
+            showToast("📞 Đang gọi Nguyễn Văn An...")
+        }
+        
+        function fakeChat() {
+            showToast("💬 Đã mở cửa sổ chat hỗ trợ")
+        }
+        
+        function toggleVoice() {
+            const phrases = [
+                "Đang quét mã hàng...",
+                "Đã nhận diện đơn DH250603001",
+                "Gọi hỗ trợ hotline"
+            ]
+            showToast(phrases[Math.floor(Math.random()*phrases.length)])
+        }
+        
+        function showProfile() {
+            showToast("👴 Nguyễn Văn A - Nhân viên giao hàng • 68 tuổi")
+        }
+        
+        function logout() {
+            if (confirm("Đăng xuất khỏi ứng dụng?")) {
+                showToast("Đã đăng xuất. Hẹn gặp lại bác!")
+            }
+        }
+        
+        function showToast(msg) {
+            const toast = document.getElementById('toast')
+            const text = document.getElementById('toast-text')
+            text.innerHTML = msg
+            toast.classList.remove('hidden')
+            setTimeout(() => toast.classList.add('hidden'), 3000)
+        }
+        
+        // Init
+        function init() {
+            renderOrders()
+            switchScreen(1)
+            
+            // Demo auto success after 8 seconds
+            setTimeout(() => {
+                if (currentScreen === 1) showToast("💡 Nhắc: Hôm nay còn 5 đơn chưa quét")
+            }, 8000)
+            
+            console.log('%cỨng dụng Quét Hàng cho người cao tuổi đã sẵn sàng 📦', 'color:#1e40af;font-weight:600')
+        }
+        
+        window.onload = init
+    </script>
+</body>
+</html>
